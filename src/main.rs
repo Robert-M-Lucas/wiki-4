@@ -2,13 +2,10 @@ use std::collections::{HashSet, VecDeque};
 use std::collections::hash_map::DefaultHasher;
 use std::env;
 use std::hash::{Hash, Hasher};
-use std::io::Write;
-use std::ops::Deref;
-use std::rc::Rc;
 use std::time::Instant;
 use hhmmss::Hhmmss;
 use num_format::{Locale, ToFormattedString};
-use rusqlite::{Connection, Error, Statement};
+use rusqlite::{Connection, Statement};
 
 
 // No Rc: 10.1M Cache - 4.3GB
@@ -18,7 +15,7 @@ use rusqlite::{Connection, Error, Statement};
 fn to_titlecase(name: &String) -> String {
     let mut new_name = String::with_capacity(name.len());
 
-    let mut capitalise = false;
+    let mut capitalise = true;
     for c in name.chars() {
         if c == ' ' {
             capitalise = true;
@@ -50,7 +47,7 @@ fn main() {
     // let starting_at = "Tobi 12";
     // let searching_for = "xxINVALIDxx";
 
-    let (mut starting_at, mut searching_for) = if args.len() >= 3 {
+    let (starting_at, searching_for) = if args.len() >= 3 {
         let b = args.remove(2);
         let a = args.remove(1);
         (a, b)
@@ -77,9 +74,6 @@ fn main() {
     ).unwrap();
 
     let mut stmt = db.prepare("SELECT destination_id FROM links WHERE source_id = ?").unwrap();
-
-    println!("{}", get_links(start_id, &mut stmt).len());
-    println!("{}", get_links(end_id, &mut stmt).len());
 
     // let mut cached_query = db.prepare_cached("SELECT destination_id FROM links WHERE source_id = ?").unwrap();
     //
@@ -141,7 +135,7 @@ fn main() {
     visited.insert(LinkedPage::new(start_id, None));
 
     //? Consider linked list
-    let mut open_set = VecDeque::with_capacity(10_000_000);
+    let mut open_set = VecDeque::with_capacity(7_500_000);
     open_set.push_back(start_id);
 
     let mut count: u32 = 0;
@@ -155,7 +149,7 @@ fn main() {
         count += 1;
         if count % 10_000 == 0 {
             println!(
-                "Pages searched: {} [{:?}/page] | Cache size: {} | Open set size: {}",
+                "Pages searched: {} [{:?}/page] | Visited: {} | Open set size: {}",
                 count.to_formatted_string(&Locale::en),
                 start_time.elapsed() / count,
                 visited.len().to_formatted_string(&Locale::en),
@@ -171,6 +165,7 @@ fn main() {
             }
 
             if link == end_id {
+                println!("Final path: (Capitalisation of words may be incorrect)");
                 println!("{}", LinkedPage::new(link, Some(page)).unwind(&visited, &db));
                 break 'main_loop;
             }
@@ -186,7 +181,7 @@ fn main() {
 
     println!("Completed in {}", start_time.elapsed().hhmmssxxx());
     println!(
-        "Pages searched: {} [{:?}/page] | Cache size: {} | Open set size: {}",
+        "Pages searched: {} [{:?}/page] | Visited: {} | Open set size: {}",
         count.to_formatted_string(&Locale::en),
         start_time.elapsed() / count,
         visited.len().to_formatted_string(&Locale::en),
@@ -261,7 +256,7 @@ impl LinkedPage {
 
         let mut output = String::new();
 
-        let (title, redirect): (String, bool) = stmt.query_row([self.page], |row| Ok((row.get(0).unwrap(), row.get(1).unwrap()))).unwrap();
+        let (title, _redirect): (String, bool) = stmt.query_row([self.page], |row| Ok((row.get(0).unwrap(), row.get(1).unwrap()))).unwrap();
         output = to_titlecase(&title) + output.as_str();
 
         let mut from = self.from;
