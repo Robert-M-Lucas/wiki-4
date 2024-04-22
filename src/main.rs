@@ -68,8 +68,7 @@ fn main() {
         "PRAGMA synchronous = 0;
               PRAGMA locking_mode = EXCLUSIVE;
               PRAGMA temp_store = MEMORY;
-              PRAGMA journal_mode = OFF;
-              "
+              PRAGMA journal_mode = OFF;"
         ,
     ).unwrap();
 
@@ -149,7 +148,7 @@ fn main() {
         count += 1;
         if count % 10_000 == 0 {
             println!(
-                "Pages searched: {} [{:?}/page] | Visited: {} | Open set size: {}",
+                "Pages searched: {} [{:?}/page] | Seen: {} | Open set size: {}",
                 count.to_formatted_string(&Locale::en),
                 start_time.elapsed() / count,
                 visited.len().to_formatted_string(&Locale::en),
@@ -181,7 +180,7 @@ fn main() {
 
     println!("Completed in {}", start_time.elapsed().hhmmssxxx());
     println!(
-        "Pages searched: {} [{:?}/page] | Visited: {} | Open set size: {}",
+        "Pages searched: {} [{:?}/page] | Seen: {} | Open set size: {}",
         count.to_formatted_string(&Locale::en),
         start_time.elapsed() / count,
         visited.len().to_formatted_string(&Locale::en),
