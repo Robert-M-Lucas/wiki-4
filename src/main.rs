@@ -74,61 +74,6 @@ fn main() {
 
     let mut stmt = db.prepare("SELECT destination_id FROM links WHERE source_id = ?").unwrap();
 
-    // let mut cached_query = db.prepare_cached("SELECT destination_id FROM links WHERE source_id = ?").unwrap();
-    //
-    // for p in [&mut starting_at, &mut searching_for] {
-    //     loop {
-    //         let res: Result<bool, Error> = cached_query.query_row(
-    //             (p.to_owned(),),
-    //             |row| Ok(row.get(2).unwrap())
-    //         );
-    //
-    //         if let Ok(is_redirect) = res{
-    //             if is_redirect {
-    //                 println!("'{p}' is a valid redirect to '{}'", row.0);
-    //
-    //                 print!("Would you like to use the page this redirect points to? (Y/N): ");
-    //                 std::io::stdout().flush().ok();
-    //                 let mut r = String::new();
-    //                 std::io::stdin().read_line(&mut r).unwrap();
-    //
-    //                 if r.chars().next().unwrap().to_uppercase().next().unwrap() == 'Y' {
-    //                     *p = row.0;
-    //                     continue;
-    //                 }
-    //             }
-    //             else {
-    //                 println!("'{p}' is a valid page");
-    //             }
-    //         }
-    //         else {
-    //             println!("'{p}' is invalid");
-    //
-    //             print!("Would you like to try title case? (Y/N): ");
-    //             std::io::stdout().flush().ok();
-    //             let mut r = String::new();
-    //             std::io::stdin().read_line(&mut r).unwrap();
-    //
-    //             if r.chars().next().unwrap().to_uppercase().next().unwrap() == 'Y' {
-    //                 *p = to_titlecase(&p);
-    //                 continue;
-    //             }
-    //
-    //             print!("Would you like to continue anyway? (Y/N): ");
-    //             std::io::stdout().flush().ok();
-    //             let mut r = String::new();
-    //             std::io::stdin().read_line(&mut r).unwrap();
-    //
-    //             if r.chars().next().unwrap().to_uppercase().next().unwrap() != 'Y' {
-    //                 return;
-    //             }
-    //         }
-    //
-    //         break;
-    //     }
-    // }
-
-    // println!("Finding '{}' -> '{}'", starting_at, searching_for);
 
     let mut visited: HashSet<LinkedPage> = HashSet::with_capacity(17_000_000);
     visited.insert(LinkedPage::new(start_id, None));
